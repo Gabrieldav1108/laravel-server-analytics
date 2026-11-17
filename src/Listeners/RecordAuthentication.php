@@ -32,10 +32,16 @@ class RecordAuthentication
         $this->recorder->record(EventType::LoginFailed, $event->guard, Actor::anonymous());
     }
 
-    private function actorFor(Authenticatable $user): Actor
+    private function actorFor(?Authenticatable $user): Actor
     {
+        $currentActor = ServerAnalytics::currentActor();
+
+        if ($user === null) {
+            return $currentActor;
+        }
+
         return new Actor(
-            tenant: ServerAnalytics::currentActor()->tenant,
+            tenant: $currentActor->tenant,
             userId: ServerAnalytics::stringOrNull($user->getAuthIdentifier()),
         );
     }

@@ -29,6 +29,17 @@ it('records the logout of the user', function (): void {
         ->user_id->toBe('42');
 });
 
+it('records the logout with the current actor when the guard has no user', function (): void {
+    ServerAnalytics::resolveActorUsing(fn (): Actor => new Actor(tenant: 'ACME', userId: '7'));
+
+    event(new Logout('web', null));
+
+    expect($this->queuedEvents()[0])
+        ->type->toBe('session.logout')
+        ->tenant->toBe('ACME')
+        ->user_id->toBe('7');
+});
+
 it('records a failed login without the typed credentials', function (): void {
     event(new Failed('web', new GenericUser(['id' => 42]), [
         'email' => 'jane@example.com',
